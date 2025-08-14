@@ -2,7 +2,7 @@ import numpy as np
 
 class RK4:
     def __init__(self, state, dSdt) -> None:
-        self.S = np.copy(state)
+        self.S = state # np.copy(state)
         self.dSdt = dSdt
     
     def step(self, t, dt):
@@ -22,8 +22,8 @@ if __name__ == "__main__":
         0., # position
         0.,
 
-        0., # velocity
-        0.,
+        3., # velocity
+        4.,
 
         0.0, # angle
 

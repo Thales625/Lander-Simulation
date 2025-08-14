@@ -7,12 +7,11 @@ class Universe:
         self.parts = []
         self._shapes = []
 
-        self.active_vessel = None
         self.celestial_body = celestial_body
 
     def PhysicsLoop(self, dt):
         for vessel in self.vessels:
-            vessel.update(dt, self.celestial_body)
+            vessel.update(dt)
 
     def RenderLoop(self, ax):
         for vessel in self.vessels:

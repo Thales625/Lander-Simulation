@@ -19,6 +19,7 @@ blue_ghost = Vessel(
 	position=np.array([0.0, 50.0]),
 	dry_mass=470.0,
 	fuel_mass=1100.0,
+	gravity=celestial_body.gravity,
 	size=np.array([2.0, 3.5]),
 	color="orange"
 )
@@ -107,15 +108,41 @@ blue_ghost.parts.append(Part(
 	zorder=6
 ))
 
+# another lander
+lander = Vessel(
+	position=np.array([0.0, 30.0]),
+	dry_mass=470.0,
+	fuel_mass=1100.0,
+	gravity=celestial_body.gravity,
+	size=np.array([2.0, 3.5]),
+	color="lightsteelblue"
+)
+
+lander.add_engine(0.,
+	Engine(
+		size=np.array([.4, .7]),
+		max_thrust=10000.,
+		max_angle=np.radians(20.)
+	)
+)
+
+
 universe.vessels.append(blue_ghost)
-universe.active_vessel = blue_ghost
+
+universe.vessels.append(lander)
 
 def setup_func():
 	blue_ghost.angle = -np.pi/2
-	blue_ghost.velocity = np.array([10., 0.])
+	blue_ghost.velocity = np.array([0., 0.])
 
-	blue_ghost.control.throttle = 0.3
+	blue_ghost.control.throttle = .4
 	blue_ghost.auto_pilot.engage()
+
+	# ---------
+
+	lander.velocity = np.array([4., 0.])
+	lander.control.throttle = .4
+	lander.auto_pilot.engage()
 
 def loop_func(ut):
 	target_dir = -blue_ghost.velocity
@@ -123,6 +150,13 @@ def loop_func(ut):
 	# target_dir = np.array([0., -1.])
 
 	blue_ghost.auto_pilot.target_direction = target_dir
+
+	# ---------
+
+	target_dir_2 = -lander.velocity
+	target_dir_2[1] = -(np.abs(target_dir_2[1]) + 5)
+
+	lander.auto_pilot.target_direction = target_dir_2
 
 universe.Simulate(setup_func, loop_func)
 # universe.SimulateGIF(setup_func, loop_func, 2.)

@@ -1,18 +1,24 @@
-from utils import *
 from control import Control
 from auto_pilot import AutoPilot
-
 from reference_frame import ReferenceFrame
 from shape import Shape
+from solver import RK4
+
+from utils import *
     
 def get_torque(force, position): return force[0] * position[1] - force[1] * position[0]
 
 class Vessel:
-    def __init__(self, position, dry_mass, fuel_mass, moi=None, size=np.array([20., 80.]), color="gray") -> None:
-        self.position = position
-        self.velocity = np.array([0., 0.])
-        self.angle = np.pi
-        self.angular_velocity = 0.
+    def __init__(self, position, dry_mass, fuel_mass, gravity, moi=None, size=np.array([20., 80.]), color="gray") -> None:
+        self.state = np.array([
+            *position, # position
+            0., 0.,    # velocity
+            np.pi,     # angle
+            0.,        # angular velocity
+        ])
+
+        self.force = np.array([0., 0.])
+        self.torque = 0.
 
         self.dry_mass = dry_mass
         self.fuel_mass = fuel_mass
@@ -43,7 +49,57 @@ class Vessel:
 
         self.control = Control()
         self.auto_pilot = AutoPilot(self)
+
+        # solver
+        def dSdt(S, t):
+            x, y, vx, vy, theta, omega = S
+
+            # angular
+            accel_ang = self.torque / self.moment_of_inertia
+            
+            # linear
+            accel_x, accel_y = self.force / self.mass + gravity
+            # accel_x, accel_y = self.force / self.mass - self.celestial_body.gravity
+
+            return np.array([
+                vx,        # dx/dt
+                vy,        # dy/dt
+                accel_x,   # dvx/dt
+                accel_y,   # dvy/dt
+                omega,     # dθ/dt
+                accel_ang  # dω/dt
+            ])
+
+        self.solver = RK4(self.state, dSdt)
     
+    @property
+    def position(self):
+        return np.copy(self.state[0:2])
+    @position.setter
+    def position(self, value):
+        self.state[0] = value[0]
+        self.state[1] = value[1]
+
+
+    @property
+    def velocity(self):
+        return np.copy(self.state[2:4])
+    @velocity.setter
+    def velocity(self, value):
+        self.state[2] = value[0]
+        self.state[3] = value[1]
+
+    @property
+    def angle(self):
+        return self.state[4]
+    @angle.setter
+    def angle(self, value):
+        self.state[4] = value
+
+    @property
+    def angular_velocity(self):
+        return self.state[5]
+
     @property
     def mass(self):
         return self.dry_mass + self.fuel_mass
@@ -81,7 +137,7 @@ class Vessel:
 
         self.available_torque = abs(self.available_torque)
 
-    def update(self, dt, celestial_body):
+    def update(self, dt):
         # update engines
         for engine in self.engines:
             # control 
@@ -95,27 +151,21 @@ class Vessel:
             rcs.update(self.control.gimbal)
 
         # update vessel
-        torque = 0.
-        force = np.array([0., 0.])
+        self.force = np.array([0., 0.])
+        self.torque = 0.
 
         for engine in self.engines:
             f = engine.max_thrust * self.control.throttle
-            force += f * engine.direction
-            torque += get_torque(f * vec2_from_angle(engine.angle), engine.position)
+            self.force += f * engine.direction
+            self.torque += get_torque(f * vec2_from_angle(engine.angle), engine.position)
 
         for rcs_engine in self.rcs_engines:
             f = rcs_engine.max_thrust * rcs_engine.throttle(self.control.gimbal)
-            force -= f * rotate_vec2(rcs_engine.direction, self.angle)
-            torque += get_torque(f*rcs_engine.direction, rcs_engine.reference_frame.translation)
+            self.force -= f * rotate_vec2(rcs_engine.direction, self.angle)
+            self.torque += get_torque(f*rcs_engine.direction, rcs_engine.reference_frame.translation)
 
-        accel = -celestial_body.gravity + force / self.mass
-        accel_ang = torque / self.moment_of_inertia
-
-        self.angular_velocity += accel_ang * dt
-        self.velocity += accel * dt
-
-        self.angle = (self.angle + self.angular_velocity * dt)
-        self.position += self.velocity * dt
+        # step ivp
+        self.solver.step(0, dt)
 
         # auto pilot
         self.auto_pilot.update(dt)
