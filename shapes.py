@@ -3,9 +3,11 @@ from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
 
 class Shape:
-    def __init__(self, artist: Artist):
+    def __init__(self, artist: Artist, reference_frame=None):
         self.artist = artist
         self.ax = None
+        self.reference_frame = reference_frame
+
         self._added = False
 
     def setup(self, ax):
@@ -20,11 +22,15 @@ class Shape:
         self.ax = ax
         self._added = True
 
-    def draw(self, ax=None, transform=None):
-        if transform is not None:
-            base = ax.transData if ax is not None else self.artist.get_transform()
-            self.artist.set_transform(transform + base)
+    def draw(self, transform=None):
+        if self._added is False: return
 
+        t = self.ax.transData
+
+        if self.reference_frame is not None: t = self.reference_frame() + t
+        if transform is not None: t = transform + t
+
+        self.artist.set_transform(t)
 
 
 class Polygon(Shape):

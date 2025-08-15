@@ -137,7 +137,7 @@ class Vessel:
 
         self.available_torque = abs(self.available_torque)
 
-    def update(self, dt):
+    def update(self, dt, ut):
         # update engines
         for engine in self.engines:
             # control 
@@ -165,7 +165,7 @@ class Vessel:
             self.torque += get_torque(f*rcs_engine.direction, rcs_engine.reference_frame.translation)
 
         # step ivp
-        self.solver.step(0, dt)
+        self.solver.step(ut, dt)
 
         # auto pilot
         self.auto_pilot.update(dt)
@@ -177,16 +177,16 @@ class Vessel:
 		# clamp
         self.angle = (self.angle + np.pi) % (2*np.pi) - np.pi
 
-    def draw(self, ax):
+    def draw(self):
         transform = self.reference_frame()
 
-        self.shape.draw(ax, transform)
+        self.shape.draw(transform)
     
         for engine in self.engines:
-            engine.draw(ax, transform)
+            engine.draw(transform)
 
         for rcs_engine in self.rcs_engines:
-            rcs_engine.draw(ax, transform)
+            rcs_engine.draw(transform)
 
         for part in self.parts:
-            part.draw(ax, transform)
+            part.draw(transform)

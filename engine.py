@@ -37,7 +37,7 @@ class Engine:
         # update plume
         self.plume.set_scale(throttle + ((random()*0.1) if throttle > 0. else 0.))
     
-    def draw(self, ax, vessel_transform=None):
-        self.shape.draw(ax, self.reference_frame() + vessel_transform)
+    def draw(self, vessel_transform=None):
+        self.shape.draw(self.reference_frame() + vessel_transform)
 
-        self.plume.draw(ax, self.reference_frame() + vessel_transform)
+        self.plume.draw(self.reference_frame() + vessel_transform)

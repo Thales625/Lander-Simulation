@@ -21,5 +21,5 @@ class Plume:
     def set_scale(self, scale:float):
         self.reference_frame.scale = np.array([1., scale])
     
-    def draw(self, ax, engine_transform):
-        self.shape.draw(ax, self.reference_frame() + engine_transform)
+    def draw(self, engine_transform):
+        self.shape.draw(self.reference_frame() + engine_transform)

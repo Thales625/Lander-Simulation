@@ -155,7 +155,6 @@ def loop_func(ut):
 
 	target_dir_2 = -lander.velocity
 	target_dir_2[1] = -(np.abs(target_dir_2[1]) + 5)
-
 	lander.auto_pilot.target_direction = target_dir_2
 
 universe.Simulate(setup_func, loop_func)

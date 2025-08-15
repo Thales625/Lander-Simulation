@@ -8,5 +8,5 @@ class Part:
             zorder=zorder
         )
     
-    def draw(self, ax, vessel_transform=None):
-        self.shape.draw(ax, vessel_transform)
+    def draw(self, vessel_transform=None):
+        self.shape.draw(vessel_transform)

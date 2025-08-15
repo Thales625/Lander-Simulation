@@ -11,14 +11,14 @@ class Universe:
 
     def PhysicsLoop(self, dt, ut):
         for vessel in self.vessels:
-            vessel.update(dt)
+            vessel.update(dt, ut)
 
-    def RenderLoop(self, ax):
+    def RenderLoop(self):
         for vessel in self.vessels:
-            vessel.draw(ax)
+            vessel.draw()
         
         for part in self.parts:
-            part.shape.draw(ax)
+            part.draw()
         
     def UpdateShapes(self):
         self._shapes = []
@@ -92,11 +92,11 @@ class Universe:
 
         # DEBUG
 
-        from shapes import Line
-        from numpy import cos, sin, array
-        line = Line(end=(50., 50.))
-        line.setup(ax)
-        artists.append(line.artist)
+        # from shapes import Line
+        # from numpy import cos, sin, array
+        # line = Line(end=(50., 50.), ref_frame=self.vessels[0].reference_frame)
+        # line.setup(ax)
+        # artists.append(line.artist)
         
         # END_DEBUG
 
@@ -108,11 +108,13 @@ class Universe:
 
             # DEBUG
             # line.set_end_pos(array([cos(ut), sin(ut)]) * 10.)
-            line.draw(ax, self.vessels[0].reference_frame())
+            # line.draw()
+            # line.draw(self.vessels[1].reference_frame())
+            # line.draw()
             # END_DEBUG
 
             self.PhysicsLoop(dt, ut)
-            self.RenderLoop(ax)
+            self.RenderLoop()
 
             return artists
 
