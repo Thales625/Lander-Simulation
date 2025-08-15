@@ -17,4 +17,4 @@ class CelestialBody:
 
 		min_idx = np.argmin(slopes)
 
-		return x_arr[min_idx], y_arr[min_idx]
+		return np.array([x_arr[min_idx], y_arr[min_idx]])

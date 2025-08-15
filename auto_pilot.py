@@ -25,7 +25,6 @@ class AutoPilot:
             throttle = self.vessel.control.throttle
 
             target_direction = normalized(self.vessel.reference_frame.transform_direction_to_local(self.target_direction)) # vessel ref
-            # target_direction = normalized(self.vessel.reference_frame.transform_direction(self.target_direction)) # vessel ref
             
             angle_delta = np.asin(target_direction[0])
 

@@ -85,7 +85,7 @@ class Universe:
 
         ani.save(path, writer=PillowWriter(fps=int(1/dt)))
 
-    def Simulate(self, setup_func, loop_func, target_spot, camera_pos, D=20., dt=0.01):
+    def Simulate(self, setup_func, loop_func, target_spot, checkpoint_spot, camera_pos, D=20., dt=0.01):
         fig, ax = plt.subplots()
 
         self.UpdateShapes()
@@ -110,6 +110,7 @@ class Universe:
         ax.set_aspect("equal", adjustable="datalim")
 
         ax.plot(*target_spot, "o", color="red", label="Target spot landing")
+        ax.plot(*checkpoint_spot, "o", color="blue", label="Checkpoint")
 
         ax.plot(*self.celestial_body.curve(), c="gray")
         plt.title("PDG Simulation")

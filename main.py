@@ -7,6 +7,7 @@ from vessel import Vessel
 from engine import Engine
 from rcs import RCSEngine
 from part import Part
+from PDG import compute_tgo, compute_a0
 
 from utils import rotate_vec2
 
@@ -32,12 +33,12 @@ blue_ghost = Vessel(
 blue_ghost.add_engine(0.,
 	Engine(
 		vessel_reference_frame=blue_ghost.reference_frame,
-		size=np.array([.4, .7]),
-		max_thrust=10000.,
-		max_angle=np.radians(20.)
+		size=np.array([.4, .8]),
+		max_thrust=5000.,
+		max_angle=np.radians(30.)
 	)
 )
-blue_ghost.add_engine(.5,
+blue_ghost.add_engine(.55,
 	Engine(
 		vessel_reference_frame=blue_ghost.reference_frame,
 		size=np.array([.4, .7]),
@@ -45,7 +46,7 @@ blue_ghost.add_engine(.5,
 		max_angle=np.radians(20.)
 	)
 )
-blue_ghost.add_engine(-.5,
+blue_ghost.add_engine(-.55,
 	Engine(
 		vessel_reference_frame=blue_ghost.reference_frame,
 		size=np.array([.4, .7]),
@@ -60,7 +61,7 @@ blue_ghost.add_rcs_engine(-1.3,
 		vessel_reference_frame=blue_ghost.reference_frame,
 		rotation=np.radians(0.),
 		size=np.array([.3, .4]),
-		max_thrust=1000.0
+		max_thrust=2000.
 	),
 	left=False
 )
@@ -69,7 +70,7 @@ blue_ghost.add_rcs_engine(-1.3,
 		vessel_reference_frame=blue_ghost.reference_frame,
 		rotation=np.radians(0.),
 		size=np.array([.3, .4]),
-		max_thrust=1000.0
+		max_thrust=2000.
 	),
 	left=True
 )
@@ -123,22 +124,51 @@ universe.parts.append(Part(
 ))
 '''
 
-blue_ghost.position = np.array([0., 200.])
-blue_ghost.velocity = np.array([10., 0.])
+blue_ghost.position = np.array([40., 150.])
+blue_ghost.velocity = np.array([20., 1.])
 
 target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x)
+checkpoint_spot = target_spot + np.array([0., 20.])
+
+# find minimum Tgo
+Tgo = compute_tgo(blue_ghost.position-checkpoint_spot, blue_ghost.velocity, celestial_body.gravity[1], blue_ghost.available_thrust/blue_ghost.mass)
+
+if not Tgo[1]:
+	print("Not converge")
+	exit()
+
+Tgo = Tgo[0]*1.1
 
 def setup_func():
-
 	blue_ghost.control.throttle = 0.
 	blue_ghost.auto_pilot.engage()
 
 def loop_func(ut):
-	target_dir = -blue_ghost.velocity
-	target_dir[1] = -(np.abs(target_dir[1]) + 5)
+	t_go = Tgo - ut
 
+	if t_go > 1.:
+		ds = checkpoint_spot - blue_ghost.position
+
+		a0 = compute_a0(t_go, checkpoint_spot - blue_ghost.position, blue_ghost.velocity, celestial_body.gravity)
+
+		throttle = blue_ghost.mass*np.linalg.norm(a0) / blue_ghost.available_thrust
+
+		blue_ghost.control.throttle = throttle
+
+		a0[1] = -a0[1]
+		blue_ghost.auto_pilot.target_direction = a0
+
+		print(f"tgo: {t_go:.2f}\nthrottle: {throttle:.2f}\ndist: {np.linalg.norm(ds)}\n")
+		return
+
+	target_dir = -blue_ghost.velocity
+	target_dir[1] = -np.abs(target_dir[1]) - 5.
 	blue_ghost.auto_pilot.target_direction = target_dir
 
+	delta_speed = -1. - blue_ghost.velocity[1]
+	blue_ghost.control.throttle = (delta_speed*10. + celestial_body.gravity[1]) / (blue_ghost.available_thrust/blue_ghost.mass)
+	print(f"Vy: {blue_ghost.velocity[1]:.2f}\n")
 
-universe.Simulate(setup_func, loop_func, target_spot, blue_ghost.position)
+
+universe.Simulate(setup_func, loop_func, target_spot, checkpoint_spot, blue_ghost.position)
 # universe.SimulateGIF(setup_func, loop_func, 2.)
