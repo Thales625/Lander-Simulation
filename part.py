@@ -1,8 +1,8 @@
-from shape import Shape
+from shapes import Polygon
 
 class Part:
     def __init__(self, position, vertices, color, zorder=6) -> None:
-        self.shape = Shape(
+        self.shape = Polygon(
             vertices=vertices+position,
             color=color,
             zorder=zorder

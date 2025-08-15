@@ -9,7 +9,7 @@ class Universe:
 
         self.celestial_body = celestial_body
 
-    def PhysicsLoop(self, dt):
+    def PhysicsLoop(self, dt, ut):
         for vessel in self.vessels:
             vessel.update(dt)
 
@@ -42,10 +42,11 @@ class Universe:
     def SetupShapes(self, ax):
         for shape in self._shapes: shape.setup(ax)
     
-    def GetPolygons(self):
-        return [shape.polygon for shape in self._shapes]
+    def GetArtists(self):
+        return [shape.artist for shape in self._shapes]
 
 
+    # TODO fix based on Simulate()
     def SimulateGIF(self, setup_func, loop_func, duration, dt=0.1, path="simulation.gif"):
         fig, ax = plt.subplots()
 
@@ -77,7 +78,6 @@ class Universe:
         plt.plot(*self.celestial_body.curve(-500, 500, 1000))
         plt.title("PDG Simulation")
         plt.grid()
-        # plt.legend()
         plt.tight_layout()
 
         ani.save(path, writer=PillowWriter(fps=int(1/dt)))
@@ -87,18 +87,34 @@ class Universe:
 
         self.UpdateShapes()
         self.SetupShapes(ax)
+        artists = self.GetArtists()
 
-        polygons = self.GetPolygons()
+
+        # DEBUG
+
+        from shapes import Line
+        from numpy import cos, sin, array
+        line = Line(end=(50., 50.))
+        line.setup(ax)
+        artists.append(line.artist)
+        
+        # END_DEBUG
 
         setup_func()
 
         def update(frame):
-            loop_func(frame*dt)
+            ut = frame*dt
+            loop_func(ut)
 
-            self.PhysicsLoop(dt)
+            # DEBUG
+            # line.set_end_pos(array([cos(ut), sin(ut)]) * 10.)
+            line.draw(ax, self.vessels[0].reference_frame())
+            # END_DEBUG
+
+            self.PhysicsLoop(dt, ut)
             self.RenderLoop(ax)
 
-            return polygons
+            return artists
 
         ani = FuncAnimation(fig, update, interval=dt*1000, blit=True, cache_frame_data=False)
 
@@ -106,10 +122,9 @@ class Universe:
         ax.set_ylim(-10., 60.)
         ax.set_aspect("equal", adjustable="datalim")
 
-        plt.plot(*self.celestial_body.curve(-500, 500, 1000))
+        plt.plot(*self.celestial_body.curve(-500, 500, 1000), c="gray")
         plt.title("PDG Simulation")
         plt.grid()
-        # plt.legend()
         plt.tight_layout()
 
         plt.show()

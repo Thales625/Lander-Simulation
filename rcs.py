@@ -2,7 +2,7 @@ import numpy as np
 from random import random
 
 from reference_frame import ReferenceFrame
-from shape import Shape
+from shapes import Polygon
 from plume import Plume
 
 class RCSEngine:
@@ -11,7 +11,7 @@ class RCSEngine:
 
         self.reference_frame = ReferenceFrame(rotation)
 
-        self.shape = Shape(
+        self.shape = Polygon(
             vertices=[
                 size*np.array([0.5, 0.5]),
                 size*np.array([0.0, -0.5]),

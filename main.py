@@ -128,7 +128,6 @@ lander.add_engine(0.,
 
 
 universe.vessels.append(blue_ghost)
-
 universe.vessels.append(lander)
 
 def setup_func():
@@ -142,6 +141,7 @@ def setup_func():
 
 	lander.velocity = np.array([4., 0.])
 	lander.control.throttle = .4
+	lander.control.gimbal = 1.
 	lander.auto_pilot.engage()
 
 def loop_func(ut):

@@ -1,11 +1,11 @@
 import numpy as np
 
 from reference_frame import ReferenceFrame
-from shape import Shape
+from shapes import Polygon
 
 class Plume:
     def __init__(self, nozzle_size, flame_length=5.0, color="red"):
-        self.shape = Shape(
+        self.shape = Polygon(
             vertices=[
                 np.array([nozzle_size[0]*0.5, 0.0]),
                 np.array([-nozzle_size[0]*0.5, 0.0]),

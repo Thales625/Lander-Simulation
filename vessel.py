@@ -1,7 +1,7 @@
 from control import Control
 from auto_pilot import AutoPilot
 from reference_frame import ReferenceFrame
-from shape import Shape
+from shapes import Polygon
 from solver import RK4
 
 from utils import *
@@ -32,7 +32,7 @@ class Vessel:
 
         # shape
         self.size = size
-        self.shape = Shape(
+        self.shape = Polygon(
             vertices=[
                 self.size*np.array([.5, .5]),
                 self.size*np.array([-.5, .5]),
@@ -175,8 +175,7 @@ class Vessel:
         self.reference_frame.translation = self.position
 
 		# clamp
-        if self.angle > TWO_PI: self.angle = 0.
-        elif self.angle < -TWO_PI: self.angle = 0.
+        self.angle = (self.angle + np.pi) % (2*np.pi) - np.pi
 
     def draw(self, ax):
         transform = self.reference_frame()
