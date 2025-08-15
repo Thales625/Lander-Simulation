@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 def terrain(x, seed=0):
     np.random.seed(seed)
@@ -9,14 +8,16 @@ def terrain(x, seed=0):
     f = np.zeros_like(x)
 
     for _ in range(n_harmonics):
-        A = np.random.uniform(1, 1.05)   # height
-        B = np.random.uniform(0.05, 0.5) # frequency
+        A = np.random.uniform(1, 1.05)      # height
+        B = np.random.uniform(0.05, 0.5)    # frequency
         C = np.random.uniform(0.0, 2*np.pi) # phase
         f += A * (np.sin(B * x + C) + 1)
     
     return f
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
     downrange = 100.0
     dx = 1.0
 

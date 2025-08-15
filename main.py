@@ -27,6 +27,7 @@ blue_ghost = Vessel(
 # engines
 blue_ghost.add_engine(0.,
 	Engine(
+		vessel_reference_frame=blue_ghost.reference_frame,
 		size=np.array([.4, .7]),
 		max_thrust=10000.,
 		max_angle=np.radians(20.)
@@ -34,6 +35,7 @@ blue_ghost.add_engine(0.,
 )
 blue_ghost.add_engine(.5,
 	Engine(
+		vessel_reference_frame=blue_ghost.reference_frame,
 		size=np.array([.4, .7]),
 		max_thrust=1000.0,
 		max_angle=np.radians(20.)
@@ -41,6 +43,7 @@ blue_ghost.add_engine(.5,
 )
 blue_ghost.add_engine(-.5,
 	Engine(
+		vessel_reference_frame=blue_ghost.reference_frame,
 		size=np.array([.4, .7]),
 		max_thrust=1000.0,
 		max_angle=np.radians(20.)
@@ -50,6 +53,7 @@ blue_ghost.add_engine(-.5,
 # rcs
 blue_ghost.add_rcs_engine(-1.3,
 	RCSEngine(
+		vessel_reference_frame=blue_ghost.reference_frame,
 		rotation=np.radians(0.),
 		size=np.array([.3, .4]),
 		max_thrust=1000.0
@@ -58,25 +62,13 @@ blue_ghost.add_rcs_engine(-1.3,
 )
 blue_ghost.add_rcs_engine(-1.3,
 	RCSEngine(
+		vessel_reference_frame=blue_ghost.reference_frame,
 		rotation=np.radians(0.),
 		size=np.array([.3, .4]),
 		max_thrust=1000.0
 	),
 	left=True
 )
-
-# landing pad
-universe.parts.append(Part(
-	position=(lambda x: np.array([x, universe.celestial_body.terrain(x)]))(10.),
-	vertices=np.array([
-		np.array([-.5, -.5]),
-		np.array([ .5, -.5]),
-		np.array([ .5,  .5]),
-		np.array([-.5,  .5])
-	]) * np.array([10., 5.]),
-	color="gray",
-	zorder=4
-))
 
 # landing legs
 w = 0.05
@@ -93,7 +85,8 @@ blue_ghost.parts.append(Part(
 		np.array([-w, h2]),
 	], -angle),
 	color=c,
-	zorder=6
+	zorder=6,
+	reference_frame=blue_ghost.reference_frame
 ))
 
 blue_ghost.parts.append(Part(
@@ -105,7 +98,8 @@ blue_ghost.parts.append(Part(
 		np.array([-w, h2]),
 	], angle),
 	color=c,
-	zorder=6
+	zorder=6,
+	reference_frame=blue_ghost.reference_frame
 ))
 
 # another lander
@@ -122,13 +116,26 @@ lander.add_engine(0.,
 	Engine(
 		size=np.array([.4, .7]),
 		max_thrust=10000.,
-		max_angle=np.radians(20.)
+		max_angle=np.radians(20.),
+		vessel_reference_frame=lander.reference_frame
 	)
 )
 
-
 universe.vessels.append(blue_ghost)
 universe.vessels.append(lander)
+
+# landing pad
+universe.parts.append(Part(
+	position=(lambda x: np.array([x, universe.celestial_body.terrain(x)]))(10.),
+	vertices=np.array([
+		np.array([-.5, -.5]),
+		np.array([ .5, -.5]),
+		np.array([ .5,  .5]),
+		np.array([-.5,  .5])
+	]) * np.array([10., 5.]),
+	color="gray",
+	zorder=4
+))
 
 def setup_func():
 	blue_ghost.angle = -np.pi/2
@@ -147,7 +154,6 @@ def setup_func():
 def loop_func(ut):
 	target_dir = -blue_ghost.velocity
 	target_dir[1] = -(np.abs(target_dir[1]) + 5)
-	# target_dir = np.array([0., -1.])
 
 	blue_ghost.auto_pilot.target_direction = target_dir
 

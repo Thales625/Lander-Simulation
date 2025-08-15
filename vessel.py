@@ -59,7 +59,6 @@ class Vessel:
             
             # linear
             accel_x, accel_y = self.force / self.mass + gravity
-            # accel_x, accel_y = self.force / self.mass - self.celestial_body.gravity
 
             return np.array([
                 vx,        # dx/dt
@@ -183,10 +182,10 @@ class Vessel:
         self.shape.draw(transform)
     
         for engine in self.engines:
-            engine.draw(transform)
+            engine.draw()
 
         for rcs_engine in self.rcs_engines:
-            rcs_engine.draw(transform)
+            rcs_engine.draw()
 
         for part in self.parts:
-            part.draw(transform)
+            part.draw()
