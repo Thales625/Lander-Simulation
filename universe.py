@@ -85,7 +85,7 @@ class Universe:
 
         ani.save(path, writer=PillowWriter(fps=int(1/dt)))
 
-    def Simulate(self, setup_func, loop_func, dt=0.01):
+    def Simulate(self, setup_func, loop_func, target_spot, camera_pos, D=20., dt=0.01):
         fig, ax = plt.subplots()
 
         self.UpdateShapes()
@@ -105,11 +105,13 @@ class Universe:
 
         ani = FuncAnimation(fig, update, interval=dt*1000, blit=True, cache_frame_data=False)
 
-        ax.set_xlim(-30., 30.)
-        ax.set_ylim(-10., 60.)
+        ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
+        ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
         ax.set_aspect("equal", adjustable="datalim")
 
-        plt.plot(*self.celestial_body.curve(-500, 500, 1000), c="gray")
+        ax.plot(*target_spot, "o", color="red", label="Target spot landing")
+
+        ax.plot(*self.celestial_body.curve(), c="gray")
         plt.title("PDG Simulation")
         plt.grid()
         plt.tight_layout()

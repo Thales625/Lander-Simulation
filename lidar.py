@@ -1,7 +1,7 @@
 import numpy as np
 
 from ray import Ray
-from utils import normalized, vec2_from_angle
+from utils import vec2_from_angle
 
 class LiDAR:
     def __init__(self, position, terrain_func, vessel_reference_frame, fov=np.pi/2, n=1):
@@ -19,7 +19,7 @@ class LiDAR:
                 )
             )
 
-    def update(self):
+    def update(self, ut):
         for ray in self.rays:
             s = ray.propagate_ray()
 

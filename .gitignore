@@ -1,5 +1,6 @@
 # Simulation
 simulation.gif
+terrain.npz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

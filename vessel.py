@@ -148,7 +148,7 @@ class Vessel:
 
     def update(self, dt, ut):
         # update LiDAR
-        self.lidar.update()
+        # self.lidar.update(ut)
 
         # update engines
         for engine in self.engines:

@@ -1,44 +1,84 @@
 import numpy as np
 
-def terrain(x, seed=0):
-    np.random.seed(seed)
+from spline import SplineCubic
 
-    n_harmonics = 5
+class Terrain:
+    def from_file(filename="terrain.npz", scale=0.5):
+        data = np.load(filename)
+        return SplineCubic(scale*data["x"], scale*(data["y"] - np.min(data["y"])))
+   
+    def from_sine_wave(seed=1, n_harmonics=5):
+        np.random.seed(seed)
 
-    f = np.zeros_like(x)
+        def f(x):
+            v = 0
+            for _ in range(n_harmonics):
+                A = np.random.uniform(1., 1.05)     # height
+                B = np.random.uniform(0.05, 0.5)    # frequency
+                C = np.random.uniform(0.0, 2*np.pi) # phase
+                v += A * (np.sin(B * x + C) + 1)
+            return v
 
-    for _ in range(n_harmonics):
-        A = np.random.uniform(1, 1.05)      # height
-        B = np.random.uniform(0.05, 0.5)    # frequency
-        C = np.random.uniform(0.0, 2*np.pi) # phase
-        f += A * (np.sin(B * x + C) + 1)
-    
-    return f
+        f.min_x = 0
+        f.max_x = 1000
+        
+        return f
+
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    import pygame
 
-    downrange = 100.0
-    dx = 1.0
+    WIDTH, HEIGHT = 800, 600
+    FPS = 60
+    DX = 5
 
-    x_arr = np.arange(0.0, downrange, dx)
-    y_arr = terrain(x_arr)
+    # init pygame
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Draw terrain")
+    clock = pygame.time.Clock()
 
-    plt.plot(x_arr, y_arr)
+    # store points
+    terrain_points = []
 
-    # plt.axhline(0, linestyle="--")
+    running = True
+    drawing = False
 
-    plt.ylim(0, downrange)
-    plt.xlim(0, downrange)
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # left button down
+                    drawing = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1: # left button up
+                    drawing = False
 
-    # plt.gca().set_aspect('equal', adjustable='datalim')
-    # plt.show()
+        if drawing:
+            mx, my = pygame.mouse.get_pos()
+            terrain_points.append((mx, my))
 
-    safe_range = 5.0 # rocket base
+        screen.fill((0, 0, 0))
+        if len(terrain_points) > 1:
+            pygame.draw.lines(screen, (0, 255, 0), False, terrain_points, 2)
+        pygame.display.flip()
+        clock.tick(FPS)
 
-    # fun = lambda x: # integrate x to x+safe_range
+    pygame.quit()
 
-    # minimize_scalar()
+    # sort points by x
+    terrain_points = sorted(terrain_points, key=lambda p: p[0])
+    points_x = [p[0] for p in terrain_points]
+    points_y = [p[1] for p in terrain_points]
 
-    plt.plot(x_arr[:-1], np.abs(np.diff(y_arr)))
-    plt.show()
+    # interpolate points
+    x_min, x_max = min(points_x), max(points_x)
+    x_uniform = np.arange(x_min, x_max, DX)
+    y_uniform = np.interp(x_uniform, points_x, points_y)
+
+    # save file
+    np.savez("terrain.npz", x=(x_uniform-np.min(x_uniform)), y=-(y_uniform-np.min(y_uniform)))
+
+    print(f"Saved terrain with {len(x_uniform)} points!")

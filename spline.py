@@ -6,6 +6,9 @@ class SplineCubic:
         self.y = y
         self.n = len(x) - 1
 
+        self.min_x = np.min(x)
+        self.max_x = np.max(x)
+
         h = x[1:] - x[:-1]
 
         A = np.zeros((self.n-1, self.n-1))

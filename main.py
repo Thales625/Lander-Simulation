@@ -2,7 +2,7 @@ import numpy as np
 
 from universe import Universe
 from celestial_body import CelestialBody
-from terrain import terrain
+from terrain import Terrain
 from vessel import Vessel
 from engine import Engine
 from rcs import RCSEngine
@@ -10,13 +10,17 @@ from part import Part
 
 from utils import rotate_vec2
 
-celestial_body = CelestialBody(lambda x: terrain(x, 0), 1.62)
+celestial_body = CelestialBody(
+	# terrain_fun=Terrain.from_sine_wave(seed=42, n_harmonics=5),
+	terrain_fun=Terrain.from_file("terrain.npz"),
+	gravity=1.62
+)
 
 universe = Universe(celestial_body)
 
 # vessel
 blue_ghost = Vessel(
-	position=np.array([0.0, 50.0]),
+	position=np.array([0.0, 500.0]),
 	dry_mass=470.0,
 	fuel_mass=1100.0,
 	celestial_body=celestial_body,
@@ -119,10 +123,14 @@ universe.parts.append(Part(
 ))
 '''
 
-def setup_func():
-	blue_ghost.velocity = np.array([4., 0.])
+blue_ghost.position = np.array([0., 200.])
+blue_ghost.velocity = np.array([10., 0.])
 
-	blue_ghost.control.throttle = .4
+target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x)
+
+def setup_func():
+
+	blue_ghost.control.throttle = 0.
 	blue_ghost.auto_pilot.engage()
 
 def loop_func(ut):
@@ -131,5 +139,6 @@ def loop_func(ut):
 
 	blue_ghost.auto_pilot.target_direction = target_dir
 
-universe.Simulate(setup_func, loop_func)
+
+universe.Simulate(setup_func, loop_func, target_spot, blue_ghost.position)
 # universe.SimulateGIF(setup_func, loop_func, 2.)
