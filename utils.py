@@ -34,7 +34,7 @@ def rotate_vec2(vecs, theta):
     else:
         raise ValueError("invalid vec shape")
 
-def vec2_normalized(vec):
+def normalized(vec):
     norm = np.linalg.norm(vec)
 
     if norm == 0: norm = 1e-3

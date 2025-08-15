@@ -1,9 +1,9 @@
 import matplotlib.patches as mpl_patches
-from matplotlib.lines import Line2D
-from matplotlib.artist import Artist
+from matplotlib.lines import Line2D as _Line2D
+from matplotlib.artist import Artist as _Artist
 
 class Shape:
-    def __init__(self, artist: Artist, reference_frame=None):
+    def __init__(self, artist: _Artist, reference_frame=None):
         self.artist = artist
         self.ax = None
         self.reference_frame = reference_frame
@@ -15,7 +15,7 @@ class Shape:
 
         if isinstance(self.artist, mpl_patches.Patch):
             ax.add_patch(self.artist)
-        elif isinstance(self.artist, Line2D):
+        elif isinstance(self.artist, _Line2D):
             ax.add_line(self.artist)
         else:
             ax.add_artist(self.artist)
@@ -39,16 +39,16 @@ class Polygon(Shape):
 
 class Line(Shape):
     def __init__(self, start=(0., 0.), end=(0., 0.), color="black", linewidth=1.0, linestyle="-", zorder=2, reference_frame=None):
-        self._start = tuple(start)
-        self._end = tuple(end)
-        super().__init__(Line2D([self._start[0], self._end[0]], [self._start[1], self._end[1]], color=color, linewidth=linewidth, linestyle=linestyle, zorder=zorder), reference_frame)
+        self._start = start
+        self._end = end
+        super().__init__(_Line2D([self._start[0], self._end[0]], [self._start[1], self._end[1]], color=color, linewidth=linewidth, linestyle=linestyle, zorder=zorder), reference_frame)
 
     def set_start_pos(self, pos):
-        self._start = tuple(pos)
+        self._start = pos
         self._update_data()
 
     def set_end_pos(self, pos):
-        self._end = tuple(pos)
+        self._end = pos
         self._update_data()
 
     def _update_data(self):

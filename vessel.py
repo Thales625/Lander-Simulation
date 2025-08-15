@@ -2,6 +2,7 @@ from control import Control
 from auto_pilot import AutoPilot
 from reference_frame import ReferenceFrame
 from shapes import Polygon
+from lidar import LiDAR
 from solver import RK4
 
 from utils import *
@@ -9,7 +10,7 @@ from utils import *
 def get_torque(force, position): return force[0] * position[1] - force[1] * position[0]
 
 class Vessel:
-    def __init__(self, position, dry_mass, fuel_mass, gravity, moi=None, size=np.array([20., 80.]), color="gray") -> None:
+    def __init__(self, position, dry_mass, fuel_mass, celestial_body, moi=None, size=np.array([20., 80.]), color="gray") -> None:
         self.state = np.array([
             *position, # position
             0., 0.,    # velocity
@@ -58,7 +59,7 @@ class Vessel:
             accel_ang = self.torque / self.moment_of_inertia
             
             # linear
-            accel_x, accel_y = self.force / self.mass + gravity
+            accel_x, accel_y = self.force / self.mass + celestial_body.gravity
 
             return np.array([
                 vx,        # dx/dt
@@ -70,6 +71,15 @@ class Vessel:
             ])
 
         self.solver = RK4(self.state, dSdt)
+
+        # LiDAR
+        self.lidar = LiDAR(
+            position=np.array([0., .5]) * self.size,
+            terrain_func=celestial_body.terrain,
+            vessel_reference_frame=self.reference_frame,
+            fov=np.radians(25),
+            n=6,
+        )
     
     @property
     def position(self):
@@ -137,6 +147,9 @@ class Vessel:
         self.available_torque = abs(self.available_torque)
 
     def update(self, dt, ut):
+        # update LiDAR
+        self.lidar.update()
+
         # update engines
         for engine in self.engines:
             # control 
@@ -181,6 +194,8 @@ class Vessel:
 
         self.shape.draw(transform)
     
+        self.lidar.draw()
+
         for engine in self.engines:
             engine.draw()
 

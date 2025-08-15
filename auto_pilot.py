@@ -3,7 +3,7 @@ from utils import *
 class AutoPilot:
     def __init__(self, vessel) -> None:
         self.vessel = vessel
-        self.target_direction = np.array([0., 1.])
+        self.target_direction = np.array([0., -1.])
         self.engaged = False
     
     @property
@@ -24,7 +24,8 @@ class AutoPilot:
         if self.engaged:
             throttle = self.vessel.control.throttle
 
-            target_direction = vec2_normalized(self.vessel.reference_frame.transform_direction(self.target_direction)) # vessel ref
+            target_direction = normalized(self.vessel.reference_frame.transform_direction_to_local(self.target_direction)) # vessel ref
+            # target_direction = normalized(self.vessel.reference_frame.transform_direction(self.target_direction)) # vessel ref
             
             angle_delta = np.asin(target_direction[0])
 

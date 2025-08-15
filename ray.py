@@ -1,56 +1,38 @@
-def propagate_ray(pos, dir, terrain_spline, n=100):
-    s = pos.copy()
+import numpy as np
 
-    # check extrapolate spline limits
+from shapes import Line
 
-    for i in range(n):
-        h = s[1] - terrain_spline(s[0])
-        if np.abs(h) < 0.1:
-            return s
+class Ray:
+    def __init__(self, position, direction, reference_frame, terrain):
+        self.position = position
+        self.direction = direction
+        self.shape = Line(
+            start=self.position,
+            end=self.position,
+            color="green",
+            reference_frame=reference_frame,
+            zorder=1,
+            linestyle="--"
+        )
+        self.reference_frame = reference_frame
+        self.terrain = terrain
 
-        s += dir * h
+    def set_color(self, color):
+        self.shape.artist.set_color(color)
 
-        # if s[0] < 0: return None
-        # if s[0] > downrange: return None
+    def draw(self):
+        self.shape.draw()
     
-    return None
+    def propagate_ray(self, n=20, m=0.5):
+        s = self.reference_frame.transform_position_to_global(self.position)
+        d = self.reference_frame.transform_direction_to_local(self.direction)
 
-if __name__ == "__main__":
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    from utils import vec2_from_angle, rotate_vec2
-
-    from spline import SplineCubic
-    from terrain import terrain
-    
-    downrange = 100.0
-
-    x_arr = np.linspace(0.0, downrange, 100)
-    y_arr_terrain = terrain(x_arr, 2)
-
-    terrain_spline = SplineCubic(x_arr, y_arr_terrain)
-
-    rocket_pos = np.array([80., 50.])
-    rocket_dir = vec2_from_angle(-np.pi/4)
-    
-    theta_max = np.pi/4
-    for theta in np.linspace(-theta_max, theta_max, 5):
-        ray_dir = rotate_vec2(-rocket_dir, theta)
-
-        hit = propagate_ray(rocket_pos, ray_dir, terrain_spline)
-
-        if hit is not None:
-            plt.plot(*hit, "x")
-
-        plt.arrow(*rocket_pos, *(ray_dir*5))
-
-    plt.arrow(*rocket_pos, *(rocket_dir*5), width=0.5, label="Rocket")
-
-    plt.plot(x_arr, y_arr_terrain, label="Terrain")
-
-    plt.ylim(0, downrange)
-    plt.xlim(0, downrange)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+        for i in range(n):
+            h = s[1] - self.terrain(s[0])
+            if np.abs(h) < m:
+                self.shape.set_end_pos(self.reference_frame.transform_position_to_local(s))
+                # self.shape.set_end_pos(self.position + self.direction*t)
+                return s
+            s += d * h
+        
+        return None

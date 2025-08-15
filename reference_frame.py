@@ -11,5 +11,12 @@ class ReferenceFrame:
     def __call__(self):
         return Affine2D().rotate(self.rotation).scale(*self.scale).translate(*self.translation)
     
-    def transform_direction(self, direction):
-        return Affine2D().rotate(self.rotation).transform(direction)
+    def transform_direction_to_local(self, global_direction):
+        return Affine2D().rotate(self.rotation).transform(global_direction)
+
+
+    def transform_position_to_local(self, global_position):
+        return Affine2D().scale(*self.scale).translate(*-self.translation).rotate(-self.rotation).transform(global_position)
+
+    def transform_position_to_global(self, local_position):
+        return Affine2D().rotate(self.rotation).scale(*self.scale).translate(*self.translation).transform(local_position)

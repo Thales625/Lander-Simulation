@@ -37,6 +37,7 @@ class RCSEngine:
         return 0
 
     def update(self, gimbal):
+        # update plume
         throttle = self.throttle(gimbal)
         self.plume.set_scale(throttle + ((random()*0.1) if throttle > 0. else 0.))
     

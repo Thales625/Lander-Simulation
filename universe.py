@@ -29,6 +29,9 @@ class Universe:
             for part in v.parts:
                 self._shapes.append(part.shape)
 
+            for shape in v.lidar.get_shapes():
+                self._shapes.append(shape)
+
             for engine in v.engines:
                 self._shapes.append(engine.shape)
                 self._shapes.append(engine.plume.shape)
@@ -89,29 +92,11 @@ class Universe:
         self.SetupShapes(ax)
         artists = self.GetArtists()
 
-
-        # DEBUG
-
-        # from shapes import Line
-        # from numpy import cos, sin, array
-        # line = Line(end=(50., 50.), ref_frame=self.vessels[0].reference_frame)
-        # line.setup(ax)
-        # artists.append(line.artist)
-        
-        # END_DEBUG
-
         setup_func()
 
         def update(frame):
             ut = frame*dt
             loop_func(ut)
-
-            # DEBUG
-            # line.set_end_pos(array([cos(ut), sin(ut)]) * 10.)
-            # line.draw()
-            # line.draw(self.vessels[1].reference_frame())
-            # line.draw()
-            # END_DEBUG
 
             self.PhysicsLoop(dt, ut)
             self.RenderLoop()
