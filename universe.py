@@ -29,9 +29,6 @@ class Universe:
             for part in v.parts:
                 self._shapes.append(part.shape)
 
-            for shape in v.lidar.get_shapes():
-                self._shapes.append(shape)
-
             for engine in v.engines:
                 self._shapes.append(engine.shape)
                 self._shapes.append(engine.plume.shape)

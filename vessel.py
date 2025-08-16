@@ -1,11 +1,12 @@
+import numpy as np
+
 from control import Control
 from auto_pilot import AutoPilot
 from reference_frame import ReferenceFrame
 from shapes import Polygon
-from lidar import LiDAR
 from solver import RK4
 
-from utils import *
+from utils import vec2_from_angle, rotate_vec2
     
 def get_torque(force, position): return force[0] * position[1] - force[1] * position[0]
 
@@ -71,15 +72,6 @@ class Vessel:
             ])
 
         self.solver = RK4(self.state, dSdt)
-
-        # LiDAR
-        self.lidar = LiDAR(
-            position=np.array([0., .5]) * self.size,
-            terrain_func=celestial_body.terrain,
-            vessel_reference_frame=self.reference_frame,
-            fov=np.radians(25),
-            n=6,
-        )
     
     @property
     def position(self):
@@ -88,7 +80,6 @@ class Vessel:
     def position(self, value):
         self.state[0] = value[0]
         self.state[1] = value[1]
-
 
     @property
     def velocity(self):
@@ -147,9 +138,6 @@ class Vessel:
         self.available_torque = abs(self.available_torque)
 
     def update(self, dt, ut):
-        # update LiDAR
-        # self.lidar.update(ut)
-
         # update engines
         for engine in self.engines:
             # control 
@@ -193,8 +181,6 @@ class Vessel:
         transform = self.reference_frame()
 
         self.shape.draw(transform)
-    
-        self.lidar.draw()
 
         for engine in self.engines:
             engine.draw()

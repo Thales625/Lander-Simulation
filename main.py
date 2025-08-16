@@ -109,20 +109,7 @@ blue_ghost.parts.append(Part(
 
 universe.vessels.append(blue_ghost)
 
-# landing pad
-'''
-universe.parts.append(Part(
-	position=(lambda x: np.array([x, universe.celestial_body.terrain(x)]))(10.),
-	vertices=np.array([
-		np.array([-.5, -.5]),
-		np.array([ .5, -.5]),
-		np.array([ .5,  .5]),
-		np.array([-.5,  .5])
-	]) * np.array([10., 5.]),
-	color="gray",
-	zorder=4
-))
-'''
+### CONTROL
 
 blue_ghost.position = np.array([40., 150.])
 blue_ghost.velocity = np.array([20., 1.])
