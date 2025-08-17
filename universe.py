@@ -102,16 +102,29 @@ class Universe:
 
         ani = FuncAnimation(fig, update, interval=dt*1000, blit=True, cache_frame_data=False)
 
-        ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
-        ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
+        # ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
+        # ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
         ax.set_aspect("equal", adjustable="datalim")
 
-        ax.plot(*target_spot, "o", color="red", label="Target spot landing")
-        ax.plot(*checkpoint_spot, "o", color="blue", label="Checkpoint")
+        ax.plot(*target_spot, "x", color="red", label="Target spot landing")
+        # ax.plot(*checkpoint_spot, "x", color="blue", label="Checkpoint")
 
         ax.plot(*self.celestial_body.curve(), c="gray")
+        ax.plot(*self.celestial_body.get_points(), "o", c="gray")
         plt.title("PDG Simulation")
         plt.grid()
         plt.tight_layout()
 
+        plt.show()
+       
+    def plot_terrain(self):
+        fig, ax = plt.subplots()
+        ax.set_aspect("equal", adjustable="datalim")
+        ax.plot(*self.celestial_body.curve(), label="Terrain", c="black")
+        ax.plot(*self.celestial_body.get_points(), "o", c="black")
+        for x in self.celestial_body.get_points()[0]: ax.axvline(x, linestyle="--", color="black")
+        plt.title("Terrain")
+        plt.grid()
+        plt.tight_layout()
+        plt.legend()
         plt.show()

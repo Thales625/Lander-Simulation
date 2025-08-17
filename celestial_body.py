@@ -5,8 +5,11 @@ class CelestialBody:
 		self.terrain = terrain_fun # y(x)
 		self.gravity = np.array([0., -gravity])
 	
+	def get_points(self):
+		return self.terrain.x, self.terrain.y
+
 	def curve(self):
-		x_arr = np.arange(self.terrain.min_x, self.terrain.max_x, 1)
+		x_arr = np.arange(self.terrain.min_x, self.terrain.max_x, 1.)
 		return x_arr, self.terrain(x_arr)
 
 	def get_flat_spot(self, x0, x1):
