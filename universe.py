@@ -102,15 +102,15 @@ class Universe:
 
         ani = FuncAnimation(fig, update, interval=dt*1000, blit=True, cache_frame_data=False)
 
-        # ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
-        # ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
+        ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
+        ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
         ax.set_aspect("equal", adjustable="datalim")
 
         ax.plot(*target_spot, "x", color="red", label="Target spot landing")
         # ax.plot(*checkpoint_spot, "x", color="blue", label="Checkpoint")
 
         ax.plot(*self.celestial_body.curve(), c="gray")
-        ax.plot(*self.celestial_body.get_points(), "o", c="gray")
+        # ax.plot(*self.celestial_body.get_points(), "o", c="gray")
         plt.title("PDG Simulation")
         plt.grid()
         plt.tight_layout()

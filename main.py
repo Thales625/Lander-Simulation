@@ -111,11 +111,12 @@ universe.vessels.append(blue_ghost)
 
 ### CONTROL
 
-blue_ghost.position = np.array([40., 150.])
-blue_ghost.velocity = np.array([20., 1.])
+blue_ghost.position = np.array([1., 150.])
+blue_ghost.velocity = np.array([0., 0.])
 
-target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x*0.1)
 # target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x)
+target_spot = celestial_body.get_flat_spot_closest_to_vessel(blue_ghost.position[0], 10.)
+# target_spot = celestial_body.get_spot(blue_ghost.position[0] + blue_ghost.velocity[0]*10.)
 checkpoint_spot = target_spot + np.array([0., 10.])
 
 # find minimum Tgo
@@ -158,7 +159,7 @@ def loop_func(ut):
 	print(f"Vy: {blue_ghost.velocity[1]:.2f}")
 
 
-universe.plot_terrain()
+# universe.plot_terrain()
 
-# universe.Simulate(setup_func, loop_func, target_spot, checkpoint_spot, blue_ghost.position)
+universe.Simulate(setup_func, loop_func, target_spot, checkpoint_spot, blue_ghost.position)
 # universe.SimulateGIF(setup_func, loop_func, 2.)
