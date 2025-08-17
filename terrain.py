@@ -5,7 +5,7 @@ from spline import SplineCubic
 class Terrain:
     def from_file(filename="terrain.npz", scale=0.5):
         data = np.load(filename)
-        return SplineCubic(scale*data["x"], scale*(data["y"] - np.min(data["y"])))
+        return SplineCubic(scale*data["x"], scale*data["y"])
    
     def from_sine_wave(seed=1, n_harmonics=5):
         np.random.seed(seed)
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     import pygame
 
     WIDTH, HEIGHT = 800, 600
-    FPS = 60
-    DX = 5
+    FPS = 30
+    DX = 10
 
     # init pygame
     pygame.init()
@@ -55,6 +55,14 @@ if __name__ == "__main__":
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1: # left button up
                     drawing = False
+            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == 13: # ENTER
+                    # SAVE
+                    running = False
+                    break
+                if event.key == 27 or event.key == 113: # ESC or Q
+                    exit()
 
         if drawing:
             mx, my = pygame.mouse.get_pos()
@@ -68,6 +76,10 @@ if __name__ == "__main__":
 
     pygame.quit()
 
+    if not terrain_points:
+        print("Empty points")
+        exit()
+
     # sort points by x
     terrain_points = sorted(terrain_points, key=lambda p: p[0])
     points_x = [p[0] for p in terrain_points]
@@ -79,6 +91,6 @@ if __name__ == "__main__":
     y_uniform = np.interp(x_uniform, points_x, points_y)
 
     # save file
-    np.savez("terrain.npz", x=(x_uniform-np.min(x_uniform)), y=-(y_uniform-np.min(y_uniform)))
+    np.savez("terrain.npz", x=x_uniform-np.min(x_uniform), y=y_uniform-np.min(y_uniform))
 
     print(f"Saved terrain with {len(x_uniform)} points!")

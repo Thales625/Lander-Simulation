@@ -153,7 +153,7 @@ def loop_func(ut):
 	blue_ghost.auto_pilot.target_direction = target_dir
 
 	delta_speed = -1. - blue_ghost.velocity[1]
-	blue_ghost.control.throttle = (delta_speed*10. + celestial_body.gravity[1]) / (blue_ghost.available_thrust/blue_ghost.mass)
+	blue_ghost.control.throttle = (delta_speed*2. - celestial_body.gravity[1]) / (blue_ghost.available_thrust/blue_ghost.mass)
 	print(f"Vy: {blue_ghost.velocity[1]:.2f}\n")
 
 
