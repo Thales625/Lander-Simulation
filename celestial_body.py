@@ -16,22 +16,7 @@ class CelestialBody:
     def get_spot(self, x):
         return np.array([x, self.terrain(x)])
 
-    def get_flat_spot(self, x0, x1):
-        x_arr = np.linspace(x0, x1, 1000)
-        y_arr = self.terrain(x_arr)
-
-        slopes = np.abs(np.gradient(y_arr, x_arr))
-
-        min_idx = np.argmin(slopes)
-
-        return np.array([x_arr[min_idx], y_arr[min_idx]])
-
-    def get_flat_spot_closest_to_vessel(self, x_vessel, search_radius=50.0):
-        x_min = x_vessel - search_radius
-        x_max = x_vessel + search_radius
-
-        if x_min < 0: x_min = 0
-
+    def get_flat_spot(self, x_min, x_max):
         def slope_cost(x):
             dx = 0.1
             y1 = self.terrain(x - dx)

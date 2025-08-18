@@ -46,14 +46,12 @@ class Universe:
         return [shape.artist for shape in self._shapes]
 
 
-    # TODO fix based on Simulate()
-    def SimulateGIF(self, setup_func, loop_func, duration, dt=0.1, path="simulation.gif"):
+    def SimulateGIF(self, setup_func, loop_func, camera_pos, target_spot, duration, D=20., dt=0.1, path="simulation.gif"):
         fig, ax = plt.subplots()
 
         self.UpdateShapes()
         self.SetupShapes(ax)
-
-        polygons = self.GetPolygons()
+        artists = self.GetArtists()
 
         setup_func()
 
@@ -64,25 +62,28 @@ class Universe:
 
             loop_func(ut)
 
-            self.PhysicsLoop(dt)
-            self.RenderLoop(ax)
+            self.PhysicsLoop(dt, ut)
+            self.RenderLoop()
 
-            return polygons
+            return artists
 
         ani = FuncAnimation(fig, update, frames=int(duration/dt), interval=dt*1000, blit=True, cache_frame_data=False)
 
-        ax.set_xlim(-30., 30.)
-        ax.set_ylim(-10., 60.)
+        ax.set_xlim(camera_pos[0]-D, camera_pos[0]+D)
+        ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
         ax.set_aspect("equal", adjustable="datalim")
 
-        plt.plot(*self.celestial_body.curve(-500, 500, 1000))
+        ax.plot(*target_spot, "x", color="red", label="Target landing")
+
+        ax.plot(*self.celestial_body.curve(), c="gray")
         plt.title("PDG Simulation")
         plt.grid()
+        plt.legend()
         plt.tight_layout()
 
         ani.save(path, writer=PillowWriter(fps=int(1/dt)))
 
-    def Simulate(self, setup_func, loop_func, target_spot, checkpoint_spot, camera_pos, D=20., dt=0.01):
+    def Simulate(self, setup_func, loop_func, target_spot, camera_pos, D=20., dt=0.01):
         fig, ax = plt.subplots()
 
         self.UpdateShapes()
@@ -106,11 +107,10 @@ class Universe:
         ax.set_ylim(camera_pos[1]-D, camera_pos[1]+D)
         ax.set_aspect("equal", adjustable="datalim")
 
-        ax.plot(*target_spot, "x", color="red", label="Target spot landing")
-        # ax.plot(*checkpoint_spot, "x", color="blue", label="Checkpoint")
+        ax.plot(*target_spot, "x", color="red", label="Target landing")
 
-        ax.plot(*self.celestial_body.curve(), c="gray")
-        # ax.plot(*self.celestial_body.get_points(), "o", c="gray")
+        ax.plot(*self.celestial_body.curve(), c="gray") # surface
+
         plt.title("PDG Simulation")
         plt.grid()
         plt.tight_layout()
@@ -122,7 +122,6 @@ class Universe:
         ax.set_aspect("equal", adjustable="datalim")
         ax.plot(*self.celestial_body.curve(), label="Terrain", c="black")
         ax.plot(*self.celestial_body.get_points(), "o", c="black")
-        for x in self.celestial_body.get_points()[0]: ax.axvline(x, linestyle="--", color="black")
         plt.title("Terrain")
         plt.grid()
         plt.tight_layout()

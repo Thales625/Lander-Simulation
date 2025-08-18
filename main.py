@@ -111,21 +111,21 @@ universe.vessels.append(blue_ghost)
 
 ### CONTROL
 
-blue_ghost.position = np.array([1., 150.])
-blue_ghost.velocity = np.array([0., 0.])
+blue_ghost.position = np.array([60., 90.])
+blue_ghost.velocity = np.array([-5., -8.])
 
-# target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x)
-target_spot = celestial_body.get_flat_spot_closest_to_vessel(blue_ghost.position[0], 10.)
+target_spot = celestial_body.get_flat_spot(celestial_body.terrain.min_x, celestial_body.terrain.max_x)
 # target_spot = celestial_body.get_spot(blue_ghost.position[0] + blue_ghost.velocity[0]*10.)
 checkpoint_spot = target_spot + np.array([0., 10.])
 
+# universe.plot_terrain()
+# exit()
+
 # find minimum Tgo
 Tgo = compute_tgo(blue_ghost.position-checkpoint_spot, blue_ghost.velocity, celestial_body.gravity[1], blue_ghost.available_thrust/blue_ghost.mass)
-
 if not Tgo[1]:
 	print("Not converge")
-	exit()
-
+	# exit()
 Tgo = Tgo[0]
 
 def setup_func():
@@ -138,7 +138,7 @@ def loop_func(ut):
 	if t_go > 1.:
 		ds = checkpoint_spot - blue_ghost.position
 
-		a0 = compute_a0(t_go, checkpoint_spot - blue_ghost.position, blue_ghost.velocity, celestial_body.gravity)
+		a0 = compute_a0(t_go, ds, blue_ghost.velocity, celestial_body.gravity)
 
 		throttle = blue_ghost.mass*np.linalg.norm(a0) / blue_ghost.available_thrust
 
@@ -147,19 +147,19 @@ def loop_func(ut):
 		a0[1] = -a0[1]
 		blue_ghost.auto_pilot.target_direction = a0
 
-		print(f"tgo: {t_go:.2f}\nthrottle: {throttle:.2f}\ndist: {np.linalg.norm(ds)}\n")
+		print(f"tgo: {t_go:.2f}\nthrottle: {throttle:.2f}\ndist: {np.linalg.norm(ds):.2f}")
 		return
 
 	target_dir = -blue_ghost.velocity
-	target_dir[1] = -np.abs(target_dir[1]) - 5.
+	target_dir[1] = -np.abs(target_dir[1]) - 2.
 	blue_ghost.auto_pilot.target_direction = target_dir
 
-	delta_speed = -1. - blue_ghost.velocity[1]
-	blue_ghost.control.throttle = (delta_speed - celestial_body.gravity[1]) / (blue_ghost.available_thrust/blue_ghost.mass)
+	delta_speed = -2. - blue_ghost.velocity[1]
+	blue_ghost.control.throttle = (delta_speed*2. - celestial_body.gravity[1]) / (blue_ghost.available_thrust/blue_ghost.mass)
 	print(f"Vy: {blue_ghost.velocity[1]:.2f}")
 
 
-# universe.plot_terrain()
+# universe.Simulate(setup_func, loop_func, target_spot, blue_ghost.position)
 
-universe.Simulate(setup_func, loop_func, target_spot, checkpoint_spot, blue_ghost.position)
-# universe.SimulateGIF(setup_func, loop_func, 2.)
+a = .7
+universe.SimulateGIF(setup_func, loop_func, (target_spot*a + blue_ghost.position*(1.-a)), target_spot, Tgo+3., 30.)
